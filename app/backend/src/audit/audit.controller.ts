@@ -1,6 +1,12 @@
 import { Controller, Get, Query, Version } from '@nestjs/common';
 import { AuditService, AuditQuery } from './audit.service';
-import { ApiTags, ApiOperation, ApiQuery, ApiOkResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiQuery,
+  ApiOkResponse,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 
 @ApiTags('Audit')
 @Controller('audit')
@@ -11,10 +17,13 @@ export class AuditController {
   @Version('1')
   @ApiOperation({
     summary: 'Query audit logs',
-    description: 'Retrieves a filtered list of audit logs based on entity, actor, or time range.',
+    description:
+      'Retrieves a filtered list of audit logs based on entity, actor, or time range.',
   })
   @ApiOkResponse({ description: 'Audit logs retrieved successfully.' })
-  @ApiUnauthorizedResponse({ description: 'Missing or invalid authentication credentials.' })
+  @ApiUnauthorizedResponse({
+    description: 'Missing or invalid authentication credentials.',
+  })
   @ApiQuery({ name: 'entity', required: false })
   @ApiQuery({ name: 'entityId', required: false })
   @ApiQuery({ name: 'actorId', required: false })

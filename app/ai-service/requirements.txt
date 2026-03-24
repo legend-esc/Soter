@@ -27,3 +27,14 @@ kombu==5.3.4
 # Computer vision for proof-of-life checks
 opencv-python-headless==4.10.0.84
 numpy==1.26.4
+
+# OCR Dependencies
+pytesseract==0.3.10
+Pillow==11.3.0
+
+# Rate limiting
+slowapi==0.1.9
+
+# Testing
+pytest==8.0.0
+pytest-cov==4.1.0

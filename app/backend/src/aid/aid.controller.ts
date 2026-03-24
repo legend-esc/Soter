@@ -6,17 +6,26 @@ import {
 } from '@nestjs/common';
 import { AidService } from './aid.service';
 import { AiTaskWebhookDto } from './dto/ai-task-webhook.dto';
-import { ApiTags, ApiOperation, ApiOkResponse, ApiCreatedResponse, ApiBadRequestResponse, ApiNotFoundResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiOkResponse,
+  ApiCreatedResponse,
+  ApiBadRequestResponse,
+  ApiNotFoundResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 
 @ApiTags('Aid')
 @ApiBearerAuth('JWT-auth')
 @Controller('aid')
 export class AidController {
-  constructor(private readonly aidService: AidService) { }
+  constructor(private readonly aidService: AidService) {}
 
   @ApiOperation({
     summary: 'Create a new campaign',
-    description: 'Initializes a new aid campaign with provided metadata. Requires appropriate permissions.',
+    description:
+      'Initializes a new aid campaign with provided metadata. Requires appropriate permissions.',
   })
   @ApiCreatedResponse({ description: 'Campaign created successfully.' })
   @ApiBadRequestResponse({ description: 'Invalid input parameters.' })
@@ -26,7 +35,8 @@ export class AidController {
 
   @ApiOperation({
     summary: 'Update a campaign',
-    description: 'Modifies an existing campaign. Only provided fields will be updated.',
+    description:
+      'Modifies an existing campaign. Only provided fields will be updated.',
   })
   @ApiOkResponse({ description: 'Campaign updated successfully.' })
   @ApiNotFoundResponse({ description: 'The specified campaign was not found.' })
@@ -40,7 +50,8 @@ export class AidController {
 
   @ApiOperation({
     summary: 'Archive a campaign',
-    description: 'Soft-archives a campaign, making it invisible to standard listings.',
+    description:
+      'Soft-archives a campaign, making it invisible to standard listings.',
   })
   @ApiOkResponse({ description: 'Campaign archived successfully.' })
   @ApiNotFoundResponse({ description: 'The specified campaign was not found.' })
@@ -50,10 +61,13 @@ export class AidController {
 
   @ApiOperation({
     summary: 'Transition a claim status',
-    description: 'Moves a claim from one status to another (e.g., pending -> approved).',
+    description:
+      'Moves a claim from one status to another (e.g., pending -> approved).',
   })
   @ApiOkResponse({ description: 'Claim status transitioned successfully.' })
-  @ApiBadRequestResponse({ description: 'Invalid status transition requested.' })
+  @ApiBadRequestResponse({
+    description: 'Invalid status transition requested.',
+  })
   @ApiNotFoundResponse({ description: 'The specified claim was not found.' })
   async transitionClaim(
     @Param('id') id: string,
@@ -65,7 +79,8 @@ export class AidController {
 
   @ApiOperation({
     summary: 'Webhook for AI task notifications',
-    description: 'Receives notifications from the AI service when background tasks complete.',
+    description:
+      'Receives notifications from the AI service when background tasks complete.',
   })
   @ApiOkResponse({ description: 'Webhook received successfully.' })
   @ApiBadRequestResponse({ description: 'Invalid webhook payload.' })
