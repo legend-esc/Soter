@@ -16,6 +16,7 @@ import {
   createHelmetMiddleware,
   createRateLimiter,
 } from './common/security/security.module';
+import helmet from 'helmet';
 
 async function bootstrap() {
   // Load environment variables

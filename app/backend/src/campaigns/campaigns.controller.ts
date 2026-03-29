@@ -27,6 +27,7 @@ import { UpdateCampaignDto } from './dto/update-campaign.dto';
 import { ApiResponseDto } from '../common/dto/api-response.dto';
 import { Roles } from 'src/auth/roles.decorator';
 import { AppRole } from 'src/auth/app-role.enum';
+import { Throttle } from '@nestjs/throttler';
 
 @ApiTags('Campaigns')
 @ApiBearerAuth('JWT-auth')
@@ -54,6 +55,7 @@ export class CampaignsController {
   }
 
   @Get()
+  @Throttle({ default: { ttl: 60, limit: 10 } }) // Limit to 10 requests per minute for this endpoint
   @ApiOkResponse({ description: 'List of campaigns retrieved successfully.' })
   @ApiUnauthorizedResponse({
     description: 'Missing or invalid authentication credentials.',
