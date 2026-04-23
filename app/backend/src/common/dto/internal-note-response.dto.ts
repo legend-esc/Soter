@@ -16,8 +16,8 @@ export class InternalNoteResponseDto {
   @ApiProperty({ example: 'clv789xyz123' })
   authorId!: string;
 
-  @ApiPropertyOptional({ example: 'investigation' })
-  category?: string;
+  @ApiPropertyOptional({ example: 'investigation', nullable: true })
+  category?: string | null;
 
   @ApiProperty({ example: '2025-01-23T11:00:00.000Z' })
   createdAt!: Date;

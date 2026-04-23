@@ -255,3 +255,30 @@ model InternalNote {
   @@index([entityType, entityId])
   @@index([authorId])
 }
+
+enum EvidenceStatus {
+  pending
+  uploading
+  completed
+  failed
+}
+
+model EvidenceQueueItem {
+  id          String         @id @default(cuid())
+  fileName    String
+  filePath    String?        // Path to local encrypted file
+  fileHash    String         @unique // To prevent duplicate uploads
+  mimeType    String
+  size        Int
+  status      EvidenceStatus @default(pending)
+  retryCount  Int            @default(0)
+  lastError   String?
+  ownerId     String         // Actor who queued this
+  metadata    Json?          // Additional info (e.g., associated claimId)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([status])
+  @@index([ownerId])
+  @@index([fileHash])
+}
