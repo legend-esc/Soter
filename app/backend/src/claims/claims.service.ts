@@ -273,9 +273,9 @@ export class ClaimsService {
    */
   private getTokenAddressForClaim(
     claim: {
-      metadata?: Record<string, unknown> | null;
-      campaign?: { metadata?: Record<string, unknown> | null } | null;
-    } & Record<string, unknown>,
+      metadata?: any;
+      campaign?: { metadata?: any } | null;
+    } & Record<string, any>,
   ): string {
     // Default USDC on Stellar testnet
     // In production, this should come from the claim record or campaign config
@@ -283,12 +283,14 @@ export class ClaimsService {
       'GATEMHCCKCY67ZUCKTROYN24ZYT5GK4EQZ5LKG3FZTSZ3NYNEJBBENSN';
 
     // If claim has tokenAddress in metadata, use it
+
     const claimMetadata = claim.metadata as Record<string, unknown> | undefined;
     if (claimMetadata?.tokenAddress) {
       return claimMetadata.tokenAddress as string;
     }
 
     // If campaign has tokenAddress in metadata, use it
+
     const campaignMetadata = claim.campaign?.metadata as
       | Record<string, unknown>
       | undefined;

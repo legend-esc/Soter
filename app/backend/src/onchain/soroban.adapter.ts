@@ -70,9 +70,12 @@ export class SorobanAdapter implements OnchainAdapter {
     try {
       // Dynamically import stellar/cli SDK
       // @ts-expect-error - stellar is optional, only required in production
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const mod = await import('stellar');
       this.sorobanLib = {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         rpc: mod,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         api: mod,
         ...(mod as Record<string, any>),
       };

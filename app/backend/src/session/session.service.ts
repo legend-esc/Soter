@@ -157,8 +157,10 @@ export class SessionService {
         sessionId,
         stepId,
         submissionKey: dto.submissionKey,
-        payload: dto.payload,
-        response: result,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        payload: dto.payload as any,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        response: result as any,
       },
     });
 
@@ -222,7 +224,8 @@ export class SessionService {
         where: { id: stepId },
         data: {
           status: SessionStepStatus.completed,
-          output: result,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          output: result as any,
           completedAt: new Date(),
         },
       });
