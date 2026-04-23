@@ -29,4 +29,3 @@ export class CreateApiKeyDto {
   @MaxLength(200)
   description?: string;
 }
-

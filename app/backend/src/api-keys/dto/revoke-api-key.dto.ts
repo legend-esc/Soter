@@ -11,4 +11,3 @@ export class RevokeApiKeyDto {
   @MaxLength(200)
   reason?: string;
 }
-

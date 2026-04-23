@@ -84,8 +84,14 @@ describe('ApiKeysService', () => {
     });
 
     it('updates revocation metadata', async () => {
-      mockPrisma.apiKey.findUnique.mockResolvedValue({ id: 'k1', revokedAt: null });
-      mockPrisma.apiKey.update.mockResolvedValue({ id: 'k1', revokedAt: new Date() });
+      mockPrisma.apiKey.findUnique.mockResolvedValue({
+        id: 'k1',
+        revokedAt: null,
+      });
+      mockPrisma.apiKey.update.mockResolvedValue({
+        id: 'k1',
+        revokedAt: new Date(),
+      });
 
       await service.revoke('k1', 'compromised', { apiKeyId: 'actor-1' });
 
@@ -104,7 +110,7 @@ describe('ApiKeysService', () => {
 
   describe('rotate', () => {
     it('throws NotFound if key missing', async () => {
-      mockPrisma.$transaction.mockImplementation(async (fn: any) =>
+      mockPrisma.$transaction.mockImplementation((fn: any) =>
         fn({
           apiKey: {
             findUnique: jest.fn().mockResolvedValue(null),
@@ -112,21 +118,29 @@ describe('ApiKeysService', () => {
         }),
       );
 
-      await expect(service.rotate('missing', {})).rejects.toThrow(NotFoundException);
+      await expect(service.rotate('missing', {})).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('rejects rotation of revoked keys', async () => {
-      mockPrisma.$transaction.mockImplementation(async (fn: any) =>
+      mockPrisma.$transaction.mockImplementation((fn: any) =>
         fn({
           apiKey: {
-            findUnique: jest
-              .fn()
-              .mockResolvedValue({ id: 'k1', role: AppRole.admin, ngoId: null, description: null, revokedAt: new Date() }),
+            findUnique: jest.fn().mockResolvedValue({
+              id: 'k1',
+              role: AppRole.admin,
+              ngoId: null,
+              description: null,
+              revokedAt: new Date(),
+            }),
           },
         }),
       );
 
-      await expect(service.rotate('k1', {})).rejects.toThrow(BadRequestException);
+      await expect(service.rotate('k1', {})).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('creates a replacement and revokes the old key (rotation chain)', async () => {
@@ -157,7 +171,7 @@ describe('ApiKeysService', () => {
         },
       };
 
-      mockPrisma.$transaction.mockImplementation(async (fn: any) => fn(tx));
+      mockPrisma.$transaction.mockImplementation((fn: any) => fn(tx));
 
       const result = await service.rotate('old', { apiKeyId: 'actor-1' });
 
@@ -176,4 +190,3 @@ describe('ApiKeysService', () => {
     });
   });
 });
-

@@ -77,4 +77,3 @@ export class ApiKeysController {
     return ApiResponseDto.ok(revoked, 'API key revoked');
   }
 }
-
