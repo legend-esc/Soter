@@ -6,8 +6,11 @@ import { AiTaskWebhookDto, TaskStatus } from './dto/ai-task-webhook.dto';
 
 describe('AidService - Webhook Reliability Checks', () => {
   let service: AidService;
-  let redisService: jest.Mocked<RedisService>;
-  let auditService: jest.Mocked<AuditService>;
+  let redisService: RedisService;
+  let auditService: AuditService;
+  let redisGetSpy: jest.SpyInstance;
+  let redisSetSpy: jest.SpyInstance;
+  let auditRecordSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -25,8 +28,16 @@ describe('AidService - Webhook Reliability Checks', () => {
     }).compile();
 
     service = module.get<AidService>(AidService);
-    redisService = module.get(RedisService);
-    auditService = module.get(AuditService);
+    redisService = module.get<RedisService>(RedisService);
+    auditService = module.get<AuditService>(AuditService);
+
+    redisGetSpy = jest.spyOn(redisService, 'get');
+    redisSetSpy = jest.spyOn(redisService, 'set');
+    auditRecordSpy = jest.spyOn(auditService, 'record');
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('1. should successfully process a fresh, valid webhook payload', async () => {
@@ -37,19 +48,28 @@ describe('AidService - Webhook Reliability Checks', () => {
       status: TaskStatus.COMPLETED,
     };
 
-    redisService.get.mockResolvedValueOnce(null);
-    redisService.get.mockResolvedValueOnce(null);
+    redisGetSpy.mockResolvedValueOnce(null);
+    redisGetSpy.mockResolvedValueOnce(null);
 
     const result = await service.handleTaskWebhook(payload);
 
-    expect(result).toEqual({ received: true, taskId: 'task-1', status: 'completed' });
-    expect(redisService.set).toHaveBeenCalledWith('webhook:delivery:del-1', true, expect.any(Number));
-    expect(redisService.set).toHaveBeenCalledWith(
+    expect(result).toEqual({
+      received: true,
+      taskId: 'task-1',
+      status: 'completed',
+    });
+
+    expect(redisSetSpy).toHaveBeenCalledWith(
+      'webhook:delivery:del-1',
+      true,
+      expect.any(Number),
+    );
+    expect(redisSetSpy).toHaveBeenCalledWith(
       'webhook:task_ts:task-1',
       new Date('2024-03-24T10:00:00Z').getTime(),
-      expect.any(Number)
+      expect.any(Number),
     );
-    expect(auditService.record).toHaveBeenCalled();
+    expect(auditRecordSpy).toHaveBeenCalled();
   });
 
   it('2. should reject duplicate exact deliveries', async () => {
@@ -60,12 +80,16 @@ describe('AidService - Webhook Reliability Checks', () => {
       status: TaskStatus.COMPLETED,
     };
 
-    redisService.get.mockResolvedValueOnce(true);
+    redisGetSpy.mockResolvedValueOnce(true);
 
     const result = await service.handleTaskWebhook(payload);
 
-    expect(result).toEqual({ received: true, status: 'ignored', reason: 'duplicate_delivery' });
-    expect(auditService.record).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      received: true,
+      status: 'ignored',
+      reason: 'duplicate_delivery',
+    });
+    expect(auditRecordSpy).not.toHaveBeenCalled();
   });
 
   it('3. should reject stale/delayed out-of-order payloads (conflicts)', async () => {
@@ -76,13 +100,19 @@ describe('AidService - Webhook Reliability Checks', () => {
       status: TaskStatus.PROCESSING,
     };
 
-    redisService.get.mockResolvedValueOnce(null);
-    redisService.get.mockResolvedValueOnce(new Date('2024-03-24T10:00:00Z').getTime());
+    redisGetSpy.mockResolvedValueOnce(null);
+    redisGetSpy.mockResolvedValueOnce(
+      new Date('2024-03-24T10:00:00Z').getTime(),
+    );
 
     const result = await service.handleTaskWebhook(stalePayload);
 
-    expect(result).toEqual({ received: true, status: 'ignored', reason: 'stale_payload' });
-    expect(auditService.record).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      received: true,
+      status: 'ignored',
+      reason: 'stale_payload',
+    });
+    expect(auditRecordSpy).not.toHaveBeenCalled();
   });
 
   it('4. should process a progressive newer payload sequentially', async () => {
@@ -93,12 +123,14 @@ describe('AidService - Webhook Reliability Checks', () => {
       status: TaskStatus.COMPLETED,
     };
 
-    redisService.get.mockResolvedValueOnce(null);
-    redisService.get.mockResolvedValueOnce(new Date('2024-03-24T10:00:00Z').getTime());
+    redisGetSpy.mockResolvedValueOnce(null);
+    redisGetSpy.mockResolvedValueOnce(
+      new Date('2024-03-24T10:00:00Z').getTime(),
+    );
 
     const result = await service.handleTaskWebhook(newerPayload);
 
     expect(result.status).toEqual('completed');
-    expect(auditService.record).toHaveBeenCalled();
+    expect(auditRecordSpy).toHaveBeenCalled();
   });
 });
