@@ -90,7 +90,7 @@ export default function CampaignsPage() {
     setFormMessage('Sample campaign values loaded. Review and create when ready.');
   };
 
-  if (!ALLOWED_ROLES.includes(userRole)) {
+
   if (!canManageCampaigns(userRole)) {
     return (
       <div className="min-h-screen bg-gray-50 p-8 dark:bg-gray-900">
@@ -265,66 +265,68 @@ export default function CampaignsPage() {
               <p className="text-gray-500">No campaigns match the current filter.</p>
             )}
 
-            <div className="space-y-3">
-              {activeCampaigns.map(campaign => (
-                <div
-                  key={campaign.id}
-                  className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-950"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <h3 className="text-lg font-semibold">{campaign.name}</h3>
-                      <p className="text-sm text-gray-500">
-                        Budget:{' '}
-                        {campaign.budget.toLocaleString('en-US', {
-                          style: 'currency',
-                          currency: 'USD',
-                        })}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Token: {campaign.metadata?.token ?? 'N/A'}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Expiry:{' '}
-                        {campaign.metadata?.expiry
-                          ? new Date(campaign.metadata.expiry as string).toLocaleDateString()
-                          : 'N/A'}
-                      </p>
+            {!isLoading && !isError && activeCampaigns.length > 0 && (
+              <div className="space-y-3">
+                {activeCampaigns.map(campaign => (
+                  <div
+                    key={campaign.id}
+                    className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-950"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <h3 className="text-lg font-semibold">{campaign.name}</h3>
+                        <p className="text-sm text-gray-500">
+                          Budget:{' '}
+                          {campaign.budget.toLocaleString('en-US', {
+                            style: 'currency',
+                            currency: 'USD',
+                          })}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          Token: {campaign.metadata?.token ?? 'N/A'}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          Expiry:{' '}
+                          {campaign.metadata?.expiry
+                            ? new Date(campaign.metadata.expiry as string).toLocaleDateString()
+                            : 'N/A'}
+                        </p>
+                      </div>
+                      <span
+                        className={`rounded-full px-2 py-1 text-xs font-semibold ${statusStyles[campaign.status]}`}
+                      >
+                        {campaign.status}
+                      </span>
                     </div>
-                    <span
-                      className={`rounded-full px-2 py-1 text-xs font-semibold ${statusStyles[campaign.status]}`}
-                    >
-                      {campaign.status}
-                    </span>
-                  </div>
 
-                  <div className="mt-3 flex flex-wrap items-center gap-2">
-                    <Link
-                      href={`/campaigns/${campaign.id}/import-recipients`}
-                      className="rounded-md border border-blue-300 px-3 py-1 text-sm text-blue-700 transition hover:bg-blue-50 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-950/30"
-                    >
-                      Import recipients
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() => onPauseResume(campaign.id, campaign.status)}
-                      disabled={updateCampaign.isPending}
-                      className="rounded-md border border-gray-300 px-3 py-1 text-sm hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
-                    >
-                      {campaign.status === 'active' ? 'Pause' : 'Resume'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onArchive(campaign.id)}
-                      disabled={updateCampaign.isPending || campaign.status === 'archived'}
-                      className="rounded-md border border-red-400 px-3 py-1 text-sm text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
-                    >
-                      Archive
-                    </button>
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <Link
+                        href={`/campaigns/${campaign.id}/import-recipients`}
+                        className="rounded-md border border-blue-300 px-3 py-1 text-sm text-blue-700 transition hover:bg-blue-50 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-950/30"
+                      >
+                        Import recipients
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => onPauseResume(campaign.id, campaign.status)}
+                        disabled={updateCampaign.isPending}
+                        className="rounded-md border border-gray-300 px-3 py-1 text-sm hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
+                      >
+                        {campaign.status === 'active' ? 'Pause' : 'Resume'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onArchive(campaign.id)}
+                        disabled={updateCampaign.isPending || campaign.status === 'archived'}
+                        className="rounded-md border border-red-400 px-3 py-1 text-sm text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                      >
+                        Archive
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </section>
         </div>
       </main>
