@@ -42,7 +42,11 @@ describe('NotificationsService', () => {
     prismaMock = {
       notificationOutbox: {
         create: jest.fn().mockResolvedValue(mockOutbox),
-        update: jest.fn().mockResolvedValue({ ...mockOutbox, status: 'enqueued', jobId: 'job-123' }),
+        update: jest.fn().mockResolvedValue({
+          ...mockOutbox,
+          status: 'enqueued',
+          jobId: 'job-123',
+        }),
         findUnique: jest.fn().mockResolvedValue(mockOutbox),
         findMany: jest.fn().mockResolvedValue([]),
       },
@@ -77,17 +81,21 @@ describe('NotificationsService', () => {
 
       // Track call order
       const callOrder: string[] = [];
-      prismaMock.notificationOutbox.create.mockImplementation(async () => {
+      prismaMock.notificationOutbox.create.mockImplementation(() => {
         callOrder.push('create');
-        return mockOutbox;
+        return Promise.resolve(mockOutbox);
       });
-      queueMock.add.mockImplementation(async () => {
+      queueMock.add.mockImplementation(() => {
         callOrder.push('queue.add');
-        return { id: 'job-123' };
+        return Promise.resolve({ id: 'job-123' });
       });
-      prismaMock.notificationOutbox.update.mockImplementation(async () => {
+      prismaMock.notificationOutbox.update.mockImplementation(() => {
         callOrder.push('update');
-        return { ...mockOutbox, status: 'enqueued', jobId: 'job-123' };
+        return Promise.resolve({
+          ...mockOutbox,
+          status: 'enqueued',
+          jobId: 'job-123',
+        });
       });
 
       await service.sendEmail(recipient, subject, message);
@@ -136,7 +144,11 @@ describe('NotificationsService', () => {
     });
 
     it('should return outboxId and jobId', async () => {
-      const result = await service.sendEmail('test@example.com', 'Subject', 'Message');
+      const result = await service.sendEmail(
+        'test@example.com',
+        'Subject',
+        'Message',
+      );
 
       expect(result).toEqual({ outboxId: mockOutbox.id, jobId: 'job-123' });
     });
@@ -160,17 +172,22 @@ describe('NotificationsService', () => {
   describe('sendSms', () => {
     it('should create outbox record before enqueuing', async () => {
       const callOrder: string[] = [];
-      prismaMock.notificationOutbox.create.mockImplementation(async () => {
+      prismaMock.notificationOutbox.create.mockImplementation(() => {
         callOrder.push('create');
-        return { ...mockOutbox, type: 'sms', subject: null };
+        return Promise.resolve({ ...mockOutbox, type: 'sms', subject: null });
       });
-      queueMock.add.mockImplementation(async () => {
+      queueMock.add.mockImplementation(() => {
         callOrder.push('queue.add');
-        return { id: 'job-456' };
+        return Promise.resolve({ id: 'job-456' });
       });
-      prismaMock.notificationOutbox.update.mockImplementation(async () => {
+      prismaMock.notificationOutbox.update.mockImplementation(() => {
         callOrder.push('update');
-        return { ...mockOutbox, type: 'sms', status: 'enqueued', jobId: 'job-456' };
+        return Promise.resolve({
+          ...mockOutbox,
+          type: 'sms',
+          status: 'enqueued',
+          jobId: 'job-456',
+        });
       });
 
       await service.sendSms('+1234567890', 'Test SMS');
@@ -260,7 +277,9 @@ describe('NotificationsService', () => {
       const callArgs = prismaMock.notificationOutbox.findMany.mock.calls[0][0];
       const cutoff: Date = callArgs.where.scheduledFor.lt;
       const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
-      expect(Math.abs(cutoff.getTime() - tenMinutesAgo.getTime())).toBeLessThan(1000);
+      expect(Math.abs(cutoff.getTime() - tenMinutesAgo.getTime())).toBeLessThan(
+        1000,
+      );
     });
 
     it('should return stuck records ordered by scheduledFor ascending', async () => {
@@ -268,7 +287,9 @@ describe('NotificationsService', () => {
         { ...mockOutbox, id: 'old-1', scheduledFor: new Date('2026-01-01') },
         { ...mockOutbox, id: 'old-2', scheduledFor: new Date('2026-01-02') },
       ];
-      prismaMock.notificationOutbox.findMany.mockResolvedValueOnce(stuckRecords);
+      prismaMock.notificationOutbox.findMany.mockResolvedValueOnce(
+        stuckRecords,
+      );
 
       const result = await service.getStuckOutboxRecords();
 
