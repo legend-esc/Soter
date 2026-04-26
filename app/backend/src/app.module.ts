@@ -38,6 +38,7 @@ import { SessionModule } from './session/session.module';
 import { CommonServicesModule } from './common/services/common-services.module';
 import { EvidenceModule } from './evidence/evidence.module';
 import { RetentionPolicyModule } from './retention-policy/retention-policy.module';
+import { SandboxModule } from './sandbox/sandbox.module';
 
 @Module({
   imports: [
@@ -86,6 +87,7 @@ import { RetentionPolicyModule } from './retention-policy/retention-policy.modul
     CommonServicesModule,
     EvidenceModule,
     RetentionPolicyModule,
+    SandboxModule,
     ThrottlerModule.forRoot([
       {
         ttl: 60000, // 60 seconds window
